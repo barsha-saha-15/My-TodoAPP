@@ -7,7 +7,7 @@ export default function Navbar(){
             <div className="flex gap-6 text-base">
             <Link href="/home" className="hover:underline">Home</Link>
             <Link href="/add" className="hover:underline">Add</Link>
-            <Link href="/logout" className="hover:underline">Logout</Link>
+            <Link href="/" className="hover:underline">Logout</Link>
             </div>
         </nav>
     );
