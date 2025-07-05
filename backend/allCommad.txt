@@ -1,0 +1,201 @@
+npm install 
+npx prisma migrate dev --name user init
+npx prisma generate
+
+@@ at .env file , please set your postgress username, password
+
+run the server : npm run dev
+
+
+
+📌 Signup a New User
+Endpoint: POST http://localhost:5000/signup
+Description: Registers a new user with email and password.
+
+✅ Request Body
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+✅ Success Response
+Status: 201 Created
+
+{
+  "message": "User created successfully",
+  "success": true,
+  "user": {
+    "id": "abc123",
+    "email": "user@example.com",
+    "password": "password123" 
+  }
+}
+❌ Error Response
+Status: 400 Bad Request
+
+{
+  "success": false,
+  "error": "User registration failed",
+  "details": "Unique constraint failed on the fields: (`email`)"
+}
+
+
+📌 User Login
+Endpoint: POST http://localhost:5000/login
+Description: Logs in a user with email and password.
+
+✅ Request Body
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+✅ Success Response
+Status: 200 OK
+
+{
+  "success": true,
+  "message": "Login successful",
+  "user": {
+    "id": "abc123",
+    "email": "user@example.com",
+    "password": "password123"
+  }
+}
+❌ Error Responses
+User not found:
+{
+  "success": false,
+  "error": "User not found"
+}
+
+Invalid credentials:
+{
+  "success": false,
+  "error": "Invalid credentials"
+}
+
+Server error:
+{
+  "success": false,
+  "error": "Login failed",
+  "details": "Some server error"
+}
+
+
+📝 Post Routes
+📌 Create a New Post
+Endpoint: POST http://localhost:5000/posts
+Description: Creates a post for a specific user.
+
+✅ Request Body
+{
+  "title": "My First Post",
+  "userId": "abc123"
+}
+✅ Success Response
+Status: 201 Created
+
+{
+  "message": "Post created successfully",
+  "success": true,
+  "post": {
+    "id": "post123",
+    "title": "My First Post",
+    "content": null,
+    "userId": "abc123"
+  }
+}
+
+❌ Error Response
+{
+  "success": false,
+  "error": "Post creation failed",
+  "details": "Field 'userId' is required"
+}
+📌 Update an Existing Post
+Endpoint: PUT http://localhost:5000/posts/:id   [For example : http://localhost:5000/posts/bjhucsdj1111] <- you will get the userId from session storage
+Description: Updates a post by its ID.
+
+✅ URL Parameter
+id: ID of the post to update
+
+✅ Request Body
+
+{
+  "title": "Updated Title",
+}
+✅ Success Response
+Status: 200 OK
+
+{
+  "message": "Post updated successfully",
+  "success": true,
+  "post": {
+    "id": "post123",
+    "title": "Updated Title",
+    "content": "Updated content"
+  }
+}
+❌ Error Response
+
+{
+  "success": false,
+  "error": "Post update failed",
+  "details": "Post with ID 'post123' does not exist"
+}
+📌 Delete a Post
+Endpoint: DELETE http://localhost:5000/posts/:id
+Description: Deletes a post by its ID.
+
+✅ URL Parameter
+id: ID of the post to delete
+
+✅ Success Response
+Status: 200 OK
+
+{
+  "message": "Post deleted successfully",
+  "success": true
+}
+❌ Error Response
+
+{
+  "success": false,
+  "error": "Post deletion failed",
+  "details": "Record to delete does not exist."
+}
+📌 Get All Posts by User
+Endpoint: GET http://localhost:5000/allPost/:userId
+Description: Fetches all posts created by a specific user.
+
+✅ URL Parameter
+userId: ID of the user
+
+✅ Success Response
+Status: 200 OK
+
+{
+  "success": true,
+  "posts": [
+    {
+      "id": "post1",
+      "title": "First Post",
+      "content": "This is my first post",
+      "userId": "abc123"
+    },
+    {
+      "id": "post2",
+      "title": "Second Post",
+      "content": "This is another post",
+      "userId": "abc123"
+    }
+  ]
+}
+❌ Error Response
+Status: 500 Internal Server Error
+
+{
+  "success": false,
+  "error": "Failed to retrieve posts",
+  "details": "Unexpected server error"
+}
