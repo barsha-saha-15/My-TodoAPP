@@ -199,3 +199,33 @@ Status: 500 Internal Server Error
   "error": "Failed to retrieve posts",
   "details": "Unexpected server error"
 }
+
+
+
+Get a single Post
+Endpoint: GET http://localhost:5000/singlePost/:postId
+Description: Fetches all posts created by a specific user.
+
+✅ URL Parameter
+userId: ID of the user
+
+✅ Success Response
+Status: 200 OK
+
+{
+  "success": true,
+  "posts":
+    {
+      "id": "post1",
+      "title": "First Post",
+      "userId": "abc123"
+    }
+}
+❌ Error Response
+Status: 500 Internal Server Error
+
+{
+  "success": false,
+  "error": "Failed to retrieve posts",
+  "details": "Unexpected server error"
+}

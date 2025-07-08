@@ -82,7 +82,7 @@ app.post("/posts", async (req, res) => {
   }
 });
 
-app.put("/posts/:id", async (req, res) => {
+app.put("/updateposts/:id", async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
   try {
@@ -105,7 +105,7 @@ app.put("/posts/:id", async (req, res) => {
   }
 });
 
-app.delete("/posts/:id", async (req, res) => {
+app.delete("/deleteposts/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.post.delete({
@@ -136,6 +136,29 @@ app.get("/allPost/:userId", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to retrieve posts",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/singlePost/:postId", async (req, res) => {
+  const { postId } = req.params;
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId, // Assuming 'id' is the unique identifier for your posts
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ success: false, error: "Post not found" });
+    }
+
+    res.status(200).json({ success: true, post });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to retrieve post",
       details: error.message,
     });
   }
