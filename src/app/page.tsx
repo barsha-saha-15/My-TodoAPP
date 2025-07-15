@@ -33,8 +33,8 @@ export default function LoginPage() {
     try {
       const res = await axios.post("http://localhost:5000/login", data);
       if (res.data.success) {
-        console.log(res.data.user);
-        sessionStorage.setItem("userId", res.data.user.id);
+        console.log(res.data.token);
+        sessionStorage.setItem("access_key", res.data.token);
         router.push("/home");
       } else {
         // Set error message from the API response if success is false

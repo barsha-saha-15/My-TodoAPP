@@ -47,7 +47,7 @@ export default function UpdatePage() {
   const handleUpdate = async () => {
     try {
       const res = await axios.put(`http://localhost:5000/updateposts/${id}`, {
-        title: task, 
+        title: task,
       });
 
       if (res.data.success) {
@@ -72,7 +72,7 @@ export default function UpdatePage() {
             <input
               type="text"
               placeholder="Update your task"
-              value={task} 
+              value={task}
               onChange={(e) => setTask(e.target.value)}
               className="border p-2 w-full mb-2 rounded"
             />

@@ -1,12 +1,16 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
 
 const prisma = new PrismaClient();
+dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+const secretKey = process.env.JWT_SECRET_KEY;
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -53,7 +57,10 @@ app.post("/login", async (req, res) => {
         .json({ success: false, error: "Invalid credentials" });
     }
 
-    res.status(200).json({ success: true, message: "Login successful", user });
+
+    const token = jwt.sign({ userId: user.id }, secretKey, { expiresIn: '1h' });
+
+    res.status(200).json({ success: true, message: "Login successful", token });
   } catch (error) {
     res
       .status(500)
@@ -123,8 +130,8 @@ app.delete("/deleteposts/:id", async (req, res) => {
   }
 });
 
-app.get("/allPost/:userId", async (req, res) => {
-  const { userId } = req.params;
+app.get("/allPost", async (req, res) => {
+
   try {
     const posts = await prisma.post.findMany({
       where: {

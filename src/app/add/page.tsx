@@ -8,6 +8,7 @@ export default function AddPage() {
   const router = useRouter();
   const [task, setTask] = useState("");
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const userId = sessionStorage.getItem("userId"); // lowercase 'userId'
     if (!userId) {
@@ -20,7 +21,7 @@ export default function AddPage() {
     const userId = sessionStorage.getItem("userId"); // use same lowercase 'userId'
     if (!userId) return;
 
-   // for validation
+    // for validation
     if (!task.trim()) {
       setError("Title is error!");
       alert("Title is error");
@@ -29,7 +30,7 @@ export default function AddPage() {
 
     try {
       await axios.post("http://localhost:5000/posts", {
-        userId,             
+        userId,
         //content: "This is the post body", 
         title: task,
       });

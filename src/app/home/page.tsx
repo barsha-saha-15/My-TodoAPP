@@ -10,7 +10,7 @@ type Post = {
   id: string;
   title: string;
   content: string;
-  userID: string;
+  token: string;
 };
 
 type ApiResponse = {
@@ -24,26 +24,26 @@ export default function HomePage() {
   const [posts, setPost] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // ✅ spelling thik
+  const [token, setToken] = useState<string | null>(null);
 
 
   useEffect(() => {
-    const storedUserId = sessionStorage.getItem("userId");
+    const storedtoken = sessionStorage.getItem("access_key");
 
-    if (!storedUserId) {
-      console.log("No userId found in session storage. Redirecting to login page.");
+    if (!storedtoken) {
+      console.log("No token found in session storage. Redirecting to login page.");
       router.push("/");
     } else {
-      setUserId(storedUserId);
-      console.log("User ID set from sessionStorage:", storedUserId);
+      setToken(storedtoken);
+      console.log("User ID set from sessionStorage:", storedtoken);
     }
   }, [router]);
 
-  // ✅ userId change hole fetch koro
+  // ✅token change hole fetch koro
   useEffect(() => {
     const fetchPosts = async () => {
-      if (!userId) {
-        console.log("No userId available, skipping fetch");
+      if (!token) {
+        console.log("No token available, skipping fetch");
         return;
       }
 
@@ -51,9 +51,14 @@ export default function HomePage() {
       setError(null);
 
       try {
-        //console.log("Fetching posts for:", userId);
+        //console.log("Fetching posts for:", token);
         const response = await axios.get<ApiResponse>(
-          `http://localhost:5000/allPost/${userId}`
+          `http://localhost:5000/allPost`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          }
         );
         setPost(response.data.posts || []);
       } catch (err) {
@@ -77,13 +82,18 @@ export default function HomePage() {
     };
 
     fetchPosts();
-  }, [userId]);
+  }, [token]);
 
 
   const handleDelete = async (postId: string) => {
     try {
       const response = await axios.delete(
-        `http://localhost:5000/deleteposts/${postId}`
+        `http://localhost:5000/deleteposts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
       );
 
       if (response.data.success) {
@@ -91,7 +101,12 @@ export default function HomePage() {
         // again call all post of the user
         try {
           const response = await axios.get<ApiResponse>(
-            `http://localhost:5000/allPost/${userId}`
+            `http://localhost:5000/allPost`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              }
+            }
           );
           setPost(response.data.posts || []);
         } catch (err) {
