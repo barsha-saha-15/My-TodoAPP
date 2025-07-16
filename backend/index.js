@@ -1,8 +1,10 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import authenticateToken from "./middleware/verifyToken.js";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 dotenv.config();
@@ -68,8 +70,16 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/posts", async (req, res) => {
-  const { title, content, userId } = req.body;
+app.post("/posts",authenticateToken, async (req, res) => {
+  const { title} = req.body;
+  if(!title){
+    return res.status(400).json({
+      success:false,
+      error:"title is required",
+    });
+  }
+  const userId = req.userId.userId;
+
   try {
     const post = await prisma.post.create({
       data: {
@@ -77,7 +87,7 @@ app.post("/posts", async (req, res) => {
         userId,
       },
     });
-    res
+    return res
       .status(201)
       .json({ message: "Post created successfully", success: true, post });
   } catch (error) {
@@ -89,20 +99,19 @@ app.post("/posts", async (req, res) => {
   }
 });
 
-app.put("/updateposts/:id", async (req, res) => {
+app.put("/updateposts/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
   try {
     const post = await prisma.post.update({
-      where: { id },
+      where: { id, userId:req.userId.userId },
       data: {
         title,
-        content,
       },
     });
-    res
+   return res
       .status(200)
-      .json({ message: "Post updated successfully", success: true, post });
+      .json({ message: "Post updated successfully", success: true });
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -112,13 +121,13 @@ app.put("/updateposts/:id", async (req, res) => {
   }
 });
 
-app.delete("/deleteposts/:id", async (req, res) => {
+app.delete("/deleteposts/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.post.delete({
-      where: { id },
+      where: { id , userId:req.userId.userId},
     });
-    res
+   return res
       .status(200)
       .json({ message: "Post deleted successfully", success: true });
   } catch (error) {
@@ -130,12 +139,12 @@ app.delete("/deleteposts/:id", async (req, res) => {
   }
 });
 
-app.get("/allPost", async (req, res) => {
+app.get("/allPost",authenticateToken, async (req, res) => {
 
   try {
     const posts = await prisma.post.findMany({
       where: {
-        userId,
+        userId:req.userId.userId,
       },
     });
     res.status(200).json({ success: true, posts });
@@ -148,12 +157,13 @@ app.get("/allPost", async (req, res) => {
   }
 });
 
-app.get("/singlePost/:postId", async (req, res) => {
+app.get("/singlePost/:postId",authenticateToken, async (req, res) => {
   const { postId } = req.params;
   try {
     const post = await prisma.post.findUnique({
       where: {
         id: postId, // Assuming 'id' is the unique identifier for your posts
+        userId:req.userId.userId,
       },
     });
 

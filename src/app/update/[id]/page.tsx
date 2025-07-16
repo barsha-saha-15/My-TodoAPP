@@ -14,9 +14,9 @@ export default function UpdatePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
+    const sessionToken = sessionStorage.getItem("access_key");
 
-    if (!userId) {
+    if (!sessionToken) {
       router.push("/");
       return;
     }
@@ -29,12 +29,16 @@ export default function UpdatePage() {
 
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/singlePost/${id}`);
-        console.log("Fetched data:", res.data.post);
+        const res = await axios.get(`http://localhost:5000/singlePost/${id}`, {
+          headers: {
+            authorization: `Bearer ${sessionToken}`,
+          },
+        });
 
-        // assuming res.data.post.title is a string
+        console.log("Fetched data:", res.data.post);
         setTask(res.data.post?.title || "");
       } catch (err) {
+        console.error("Error fetching post:", err);
         setError("Failed to load post data");
       } finally {
         setLoading(false);
@@ -45,16 +49,26 @@ export default function UpdatePage() {
   }, [id, router]);
 
   const handleUpdate = async () => {
+    const sessionToken = sessionStorage.getItem("access_key");
     try {
-      const res = await axios.put(`http://localhost:5000/updateposts/${id}`, {
-        title: task,
-      });
+      const res = await axios.put(
+        `http://localhost:5000/updateposts/${id}`,
+        {
+          title: task,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
 
       if (res.data.success) {
         router.replace("/home");
       }
     } catch (err) {
-      setError("Failed to update post data");
+      console.error("Error updating post:", err);
+      setError("Failed to update post");
     }
   };
 

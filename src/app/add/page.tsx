@@ -10,9 +10,9 @@ export default function AddPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId"); // lowercase 'userId'
-    if (!userId) {
-      console.log("No userId found in session storage. Redirecting to login page.");
+    const storedtoken = sessionStorage.getItem("access_key"); // lowercase 'userId'
+    if (!storedtoken) {
+      console.log("No token found in session storage. Redirecting to login page.");
       router.push("/");
     }
   }, [router]);
@@ -27,13 +27,19 @@ export default function AddPage() {
       alert("Title is error");
       return;
     }
+    const storedtoken = sessionStorage.getItem("access_key");
 
     try {
       await axios.post("http://localhost:5000/posts", {
-        userId,
-        //content: "This is the post body", 
+
         title: task,
-      });
+      },
+        {
+          headers: {
+            authorization: `Bearer ${storedtoken}`,
+          },
+        }
+      );
       alert("Task added successfully!");
       setTask("");
     } catch (error) {

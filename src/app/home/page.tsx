@@ -24,7 +24,6 @@ export default function HomePage() {
   const [posts, setPost] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -33,22 +32,15 @@ export default function HomePage() {
     if (!storedtoken) {
       console.log("No token found in session storage. Redirecting to login page.");
       router.push("/");
-    } else {
-      setToken(storedtoken);
-      console.log("User ID set from sessionStorage:", storedtoken);
     }
   }, [router]);
 
   // ✅token change hole fetch koro
   useEffect(() => {
     const fetchPosts = async () => {
-      if (!token) {
-        console.log("No token available, skipping fetch");
-        return;
-      }
-
       setLoading(true);
       setError(null);
+      const storedtoken = sessionStorage.getItem("access_key");
 
       try {
         //console.log("Fetching posts for:", token);
@@ -56,8 +48,8 @@ export default function HomePage() {
           `http://localhost:5000/allPost`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
-            }
+              authorization: `Bearer ${storedtoken}`,
+            },
           }
         );
         setPost(response.data.posts || []);
@@ -82,17 +74,18 @@ export default function HomePage() {
     };
 
     fetchPosts();
-  }, [token]);
+  }, []);
 
 
   const handleDelete = async (postId: string) => {
+    const storedtoken = sessionStorage.getItem("access_key");
     try {
       const response = await axios.delete(
         `http://localhost:5000/deleteposts/${postId}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          }
+            authorization: `Bearer ${storedtoken}`,
+          },
         }
       );
 
@@ -104,8 +97,8 @@ export default function HomePage() {
             `http://localhost:5000/allPost`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
-              }
+                authorization: `Bearer ${storedtoken}`,
+              },
             }
           );
           setPost(response.data.posts || []);
@@ -147,7 +140,7 @@ export default function HomePage() {
         setError("Unexpected error.");
       }
     }
-  }
+  };
 
   return (
     <div>
