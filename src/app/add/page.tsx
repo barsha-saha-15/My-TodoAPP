@@ -1,4 +1,5 @@
 "use client";
+
 import Navbar from "@/components/navbar";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,8 +19,6 @@ export default function AddPage() {
   }, [router]);
 
   const handleAddTask = async () => {
-    const userId = sessionStorage.getItem("userId"); // use same lowercase 'userId'
-    if (!userId) return;
 
     // for validation
     if (!task.trim()) {

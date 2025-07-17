@@ -21,10 +21,11 @@ app.get("/", (req, res) => {
 app.post("/signup", async (req, res) => {
   const { email, password } = req.body;
   try {
+    const hashPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         email,
-        password, // In a real application, hash this password!
+        password: hashPassword, // In a real application, hash this password!
       },
     });
     res
@@ -51,13 +52,14 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    // In a real application, compare hashed passwords
-    if (user.password !== password) {
+    if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, error: "Invalid credentials" });
+        .json({ success: false, error: "invalied credentials" });
     }
+
 
 
     const token = jwt.sign({ userId: user.id }, secretKey, { expiresIn: '1h' });
@@ -70,12 +72,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/posts",authenticateToken, async (req, res) => {
-  const { title} = req.body;
-  if(!title){
+app.post("/posts", authenticateToken, async (req, res) => {
+  const { title } = req.body;
+  if (!title) {
     return res.status(400).json({
-      success:false,
-      error:"title is required",
+      success: false,
+      error: "title is required",
     });
   }
   const userId = req.userId.userId;
@@ -99,17 +101,17 @@ app.post("/posts",authenticateToken, async (req, res) => {
   }
 });
 
-app.put("/updateposts/:id",authenticateToken, async (req, res) => {
+app.put("/updateposts/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
   try {
     const post = await prisma.post.update({
-      where: { id, userId:req.userId.userId },
+      where: { id, userId: req.userId.userId },
       data: {
         title,
       },
     });
-   return res
+    return res
       .status(200)
       .json({ message: "Post updated successfully", success: true });
   } catch (error) {
@@ -121,13 +123,13 @@ app.put("/updateposts/:id",authenticateToken, async (req, res) => {
   }
 });
 
-app.delete("/deleteposts/:id",authenticateToken, async (req, res) => {
+app.delete("/deleteposts/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.post.delete({
-      where: { id , userId:req.userId.userId},
+      where: { id, userId: req.userId.userId },
     });
-   return res
+    return res
       .status(200)
       .json({ message: "Post deleted successfully", success: true });
   } catch (error) {
@@ -139,12 +141,12 @@ app.delete("/deleteposts/:id",authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/allPost",authenticateToken, async (req, res) => {
+app.get("/allPost", authenticateToken, async (req, res) => {
 
   try {
     const posts = await prisma.post.findMany({
       where: {
-        userId:req.userId.userId,
+        userId: req.userId.userId,
       },
     });
     res.status(200).json({ success: true, posts });
@@ -157,13 +159,13 @@ app.get("/allPost",authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/singlePost/:postId",authenticateToken, async (req, res) => {
+app.get("/singlePost/:postId", authenticateToken, async (req, res) => {
   const { postId } = req.params;
   try {
     const post = await prisma.post.findUnique({
       where: {
         id: postId, // Assuming 'id' is the unique identifier for your posts
-        userId:req.userId.userId,
+        userId: req.userId.userId,
       },
     });
 
